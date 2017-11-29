@@ -71,8 +71,10 @@ private:
     void ZigZag(SplayTreeNode* node){
         SplayTreeNode* p = node->daddy;
         SplayTreeNode* g = p->daddy;
-        (g->left == p ? g->left : g->right ) = my_zig(node, p);
-        my_zig(node, g);
+        if (g->left == p)        +        (g->left == p ? g->left : g->right ) = my_zig(node, p);
+            g->left = my_zig(node, p);
+        else
+            g->right = my_zig(node, p);        my_zig(node, g);
         if (this->root = g)
             this->root = node;
     }
@@ -108,14 +110,112 @@ private:
         *t1 = t1_new;
         *t2 = t2_new;
     }
-
-public:
     
+    
+    
+    
+    
+    
+    SplayTreeNode* recFind(const Key key, SplayTreeNode* root){
+        if (root->key == key)
+            return root;
+
+        if (root->key < key){
+            if (root->left)
+                Splay(recFind(key, root->left)->daddy) ;
+            else
+                Splay(root);
+        }
+        else{
+            if (root->right)
+                Splay(recFind(key, root->right)->daddy);
+            else
+                Splay(root);
+            }
+            return root;
+        }
+    
+    
+    
+    
+    
+    SplayTreeNode* recFindMin(SplayTreeNode* root){
+        if (root->left)
+            Splay(recFind(key, root->left)->daddy) ;
+        else
+            Splay(root);
+            return root;
+    }
+
+    SplayTreeNode* recFindMax(SplayTreeNode* root){
+        if (root->right)
+            Splay(recFind(key, root->right)->daddy) ;
+        else
+            Splay(root);
+        return root;
+    }
+
+    
+    
+public:
+
 
     SplayTree(): root(nullptr){}
 
     ~SplayTree() {
         delSubTree(root);
+    }
+    
+    
+    
+    
+    
+    
+    T* find(const Key key){
+        this->root = recFind(key, this->root);
+        return this->root->value;
+    }
+
+    T* findMin(){
+        this->root = recFindMin(this->root);
+        return this->root->value;
+    }
+
+    T* findMax(){
+        this->root =  recFindMin(this->root);
+        return this->root->value;
+    }
+
+    void insert(const Key i, const T val){
+        SplayTree *tmp1 = new SplayTree;
+        SplayTree *tmp2 = new SplayTree;
+        this->split(i, &tmp1, &tmp2);
+
+        delSubTree(this->root);
+        SplayTreeNode* node = new SplayTreeNode(i, val);
+        this->root = node;
+
+        join(this, tmp2);
+        join(tmp1, this);
+
+        delete tmp1;
+        delete tmp2;
+    }
+
+    void del(Key i){
+        find(i);
+        SplayTree *tmpTree1 = new SplayTree;
+        SplayTree *tmpTree2 = new SplayTree;
+        this->split(i, &tmpTree1, &tmpTree2);
+
+        SplayTreeNode* tmp = tmpTree1->root->left;
+        tmp->daddy = nullptr;
+        delete tmpTree1->root;
+        tmpTree1->root = tmp;
+
+        delete tmpTree1;
+        delete tmpTree2;
+
     }
 }
 #endif /* SplayTree_h */
