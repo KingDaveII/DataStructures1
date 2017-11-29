@@ -140,35 +140,32 @@ public:
     }
 
     void insert(const Key i, const T val){
-        SplayTree *tmp1 = new SplayTree;
-        SplayTree *tmp2 = new SplayTree;
+        SplayTree *tmp1;
+        SplayTree *tmp2;
         this->split(i, &tmp1, &tmp2);
 
-        delSubTree(this->root);
         SplayTreeNode* node = new SplayTreeNode(i, val);
         this->root = node;
 
         join(this, tmp2);
         join(tmp1, this);
-
-        delete tmp1;
-        delete tmp2;
+        this->root = tmp1->root;
     }
 
     void del(Key i){
         find(i);
-        SplayTree *tmpTree1 = new SplayTree;
-        SplayTree *tmpTree2 = new SplayTree;
+        SplayTree *tmpTree1;
+        SplayTree *tmpTree2;
         this->split(i, &tmpTree1, &tmpTree2);
 
+        tmpTree1->findMax();
         SplayTreeNode* tmp = tmpTree1->root->left;
         tmp->daddy = nullptr;
         delete tmpTree1->root;
         tmpTree1->root = tmp;
 
-        delete tmpTree1;
-        delete tmpTree2;
-
+        join(tmpTree1, tmpTree2);
+        this->root = tmpTree1->root;
     }
 
 };
